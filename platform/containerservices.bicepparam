@@ -1,3 +1,11 @@
 using './containerservices.bicep'
 
-param name = 'id-#{{ service }}-#{{ environment }}-#{{ regionCode }}-#{{ idInstanceVersion }}'
+// Common
+param tags = {
+  environment: '#{{ environment }}'
+  owner: '#{{ owner }}'
+  service: '#{{ service }}'
+}
+
+// Container Apps Environment
+param deployContainerAppsEnvironmentString = '#{{ deployContainerAppsEnvironment }}'
