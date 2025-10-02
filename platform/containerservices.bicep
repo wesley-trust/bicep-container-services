@@ -9,6 +9,19 @@ param tags object = {}
 
 var normalizedTags = empty(tags) ? null : tags
 
+// Virtual Network
+param virtualNetworkName string
+param containerAppsEnvironmentSubnetName string
+
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-07-01' existing = {
+  name: virtualNetworkName
+}
+
+resource caeSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-07-01' existing = {
+  name: containerAppsEnvironmentSubnetName
+  parent: virtualNetwork
+}
+
 // Container Apps Environment
 @description('Flag to determine whether to deploy the Azure Container Apps environment. Set to true to deploy, false to skip deployment. Accepted values: "true", "false".')
 param deployContainerAppsEnvironmentString string
@@ -17,6 +30,7 @@ var deployContainerAppsEnvironment = bool(deployContainerAppsEnvironmentString)
 module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.3' = if (deployContainerAppsEnvironment == true) {
   params: {
     name: 'cae'
+    infrastructureSubnetResourceId: caeSubnet.id
     location: location
     tags: normalizedTags
   }
