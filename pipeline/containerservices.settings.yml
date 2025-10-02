@@ -11,7 +11,7 @@ parameters:
   - name: drInvocation
     type: boolean
     default: false
-  - name: skip_environments
+  - name: skipEnvironments
     type: object
     default:
       dev: false
@@ -28,75 +28,34 @@ resources:
       #ref: "refs/heads/main"
 
 extends:
-  template: /templates/pipeline-defaults.yml@PipelineDispatcher
+  template: /templates/pipeline-configuration-dispatcher.yml@PipelineDispatcher
   parameters:
-    ${{ each parameter in parameters }}:
-      ${{ parameter.key }}: ${{ parameter.value }}
-    # Default Overrides
-    defaultPool:
-      vmImage: "ubuntu-latest"
-    serviceConnection: serviceConnection
-    environments:
-      - name: dev
-        class: development
-        dependsOnSecondaryRegions: false
-        primaryRegion: weu
-        secondaryRegions:
-          - neu
-        drRegion: neu
-        allowedBranches:
-          - "*"
-        pool:
-          vmImage: "ubuntu-latest"
-        skipEnvironment: ${{ parameters.skip_environments.dev }}
-        poolRegionDemand: false
-      # - name: qa
-      #   class: test
-      #   dependsOnSecondaryRegions: false
-      #   primaryRegion: weu
-      #   allowedBranches:
-      #     - "main"
-      #     - "release/*"
-      #   pool:
-      #     vmImage: "ubuntu-latest"
-      #   skipEnvironment: ${{ parameters.skip_environments.qa }}
-      #   poolRegionDemand: false
-      - name: ppr
-        class: acceptance
-        dependsOnSecondaryRegions: false
-        primaryRegion: weu
-        secondaryRegions:
-          - neu
-        allowedBranches:
-          - "main"
-          - "release/*"
-        pool:
-          vmImage: "ubuntu-latest"
-        skipEnvironment: ${{ parameters.skip_environments.ppr }}
-        poolRegionDemand: false
-      - name: prd
-        class: production
-        primaryRegion: weu
-        secondaryRegions:
-          - neu
-        drRegion: neu
-        allowedBranches:
-          - "release/*"
-        pool:
-          vmImage: "ubuntu-latest"
-        poolRegionDemand: true
-    variableRoot: vars
-    variables:
-      includeCommon: true
-      includeEnv: true
-      includeEnvRegion: false
-      includeRegion: true
-    variableGroups:
-      - "Common-Variables"
-    validation:
-      enableVariableIncludes: true
-    additionalRepositories:
-      # - alias: Modules
-    keyVault:
-      name: ""
-      secretsFilter: ""
+    skipEnvironments: ${{ parameters.skipEnvironments }}
+    configuration:
+      actionGroups: ${{ parameters.actionGroups }}
+      enableProduction: ${{ parameters.enableProduction }}
+      runReviewStage: ${{ parameters.runReviewStage }}
+      drInvocation: ${{ parameters.drInvocation }}
+
+      # Configuration Override
+      # variables:
+      #   includeCommon: true
+      #   includeEnv: true
+      #   includeEnvRegion: true
+      #   includeRegion: true
+
+    # Environment Override
+    # environments:
+    #   - name: dev
+    #     class: development
+    #     dependsOnSecondaryRegions: false
+    #     primaryRegion: weu
+    #     secondaryRegions:
+    #       - neu
+    #     drRegion: neu
+    #     allowedBranches:
+    #       - "*"
+    #     pool:
+    #       vmImage: "ubuntu-latest"
+    #     skipEnvironment: ${{ parameters.skip_environments.dev }}
+    #     poolRegionDemand: false
