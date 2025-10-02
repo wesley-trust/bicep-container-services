@@ -31,6 +31,9 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.
   params: {
     name: 'cae'
     infrastructureSubnetResourceId: caeSubnet.id
+    internal: true
+    publicNetworkAccess: 'Disabled'
+    // zoneRedundant: true
     location: location
     tags: normalizedTags
   }
