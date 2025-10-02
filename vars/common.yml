@@ -17,14 +17,16 @@ variables:
 
   # Virtual Network configuration
   vNetInstanceVersion: 001
+  networkDeploymentVersion: 001
+  networkService: "network"
+  networkResourceGroup: rg-$(networkService)-$(environment)-$(regionCode)-$(networkDeploymentVersion)
 
   ## Virtual Network: vnet-001
-  vnet-001-service: "network"
-  vnet-001-name: vnet-$(vnet-001-service)-$(environment)-$(regionCode)-$(vNetInstanceVersion)
+  vnet-001-name: vnet-$(networkService)-$(environment)-$(regionCode)-$(vNetInstanceVersion)
 
   # Subnet configuration
   subnetInstanceVersion: 001
 
   ## Subnet: snet-001
   snet-001-service: "cae"
-  snet-001-name: snet-$(vnet-001-service)-$(environment)-$(regionCode)-vnet-$(vNetInstanceVersion)-$(snet-001-service)-$(subnetInstanceVersion)
+  snet-001-name: snet-$(networkService)-$(environment)-$(regionCode)-vnet-$(vNetInstanceVersion)-$(snet-001-service)-$(subnetInstanceVersion)

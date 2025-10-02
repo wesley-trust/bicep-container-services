@@ -11,9 +11,11 @@ var normalizedTags = empty(tags) ? null : tags
 
 // Virtual Network
 param virtualNetworkName string
+param virtualNetworkResourceGroupName string
 param containerAppsEnvironmentSubnetName string
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-07-01' existing = {
+  scope: resourceGroup(virtualNetworkResourceGroupName)
   name: virtualNetworkName
 }
 
