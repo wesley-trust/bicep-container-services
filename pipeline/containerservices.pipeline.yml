@@ -66,15 +66,15 @@ parameters:
 
   # Environment skips
   - name: skip_dev
-    displayName: "Skip Environment: Development"
+    displayName: "Skip Environments: Development"
     type: boolean
     default: false
   - name: skip_qa
-    displayName: "Skip Environment: QA"
+    displayName: "Skip Environments: QA"
     type: boolean
     default: true
   - name: skip_ppr
-    displayName: "Skip Environment: Pre-Production"
+    displayName: "Skip Environments: Pre-Production"
     type: boolean
     default: true
 
