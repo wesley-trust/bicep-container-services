@@ -82,7 +82,15 @@ parameters:
   - name: skipRegions
     displayName: "Skip Regions per Environment"
     type: object
-    default:
+    values:
+      dev: { skipPrimary: false, skipSecondary: false }
+      qa: { skipPrimary: false, skipSecondary: true }
+
+  # Region Skips
+  - name: skipRegions2
+    displayName: "Skip Regions per Environment"
+    type: object
+    values:
       dev: { skipPrimary: false, skipSecondary: false }
       qa: { skipPrimary: false, skipSecondary: true }
 
