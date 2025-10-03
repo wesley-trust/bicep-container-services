@@ -29,6 +29,24 @@ parameters:
     type: boolean
     default: false
 
+  # Bicep deployment toggles
+  - name: deployResourceGroup
+    displayName: "Bicep Deploy: Resource Group"
+    type: string
+    default: inherit
+    values:
+      - inherit
+      - deploy
+      - doNotDeploy
+  - name: deployContainerAppsEnvironment
+    displayName: "Bicep Deploy: Container Apps Environment"
+    type: string
+    default: inherit
+    values:
+      - inherit
+      - deploy
+      - doNotDeploy
+
   # Bicep test toggles & settings
   - name: doNotRunBicepTests
     displayName: "Bicep Tests: Skip All"
@@ -87,6 +105,20 @@ parameters:
     displayName: "Skip Regions: Secondary"
     type: boolean
     default: false
+
+variables:
+  - ${{ if eq(parameters.deployResourceGroup, 'deploy') }}:
+      name: deployResourceGroup
+      value: "true"
+  - ${{ if eq(parameters.deployResourceGroup, 'doNotDeploy') }}:
+      name: deployResourceGroup
+      value: "false"
+  - ${{ if eq(parameters.deployContainerAppsEnvironment, 'deploy') }}:
+      name: deployContainerAppsEnvironment
+      value: "true"
+  - ${{ if eq(parameters.deployContainerAppsEnvironment, 'doNotDeploy') }}:
+      name: deployContainerAppsEnvironment
+      value: "false"
 
 extends:
   template: containerservices.settings.yml
