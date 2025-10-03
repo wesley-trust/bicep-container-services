@@ -78,22 +78,6 @@ parameters:
     type: boolean
     default: true
 
-  # Region Skips
-  - name: skipRegions
-    displayName: "Skip Regions per Environment"
-    type: object
-    values:
-      dev: { skipPrimary: false, skipSecondary: false }
-      qa: { skipPrimary: false, skipSecondary: true }
-
-  # Region Skips
-  - name: skipRegions2
-    displayName: "Skip Regions per Environment"
-    type: object
-    values:
-      dev: { skipPrimary: false, skipSecondary: false }
-      qa: { skipPrimary: false, skipSecondary: true }
-
 extends:
   template: containerservices.settings.yml
   parameters:
