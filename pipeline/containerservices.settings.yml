@@ -17,6 +17,11 @@ parameters:
       dev: false
       qa: false
       ppr: false
+  - name: skipRegions
+    type: object
+    default:
+      primary: false
+      secondary: false
 
 resources:
   repositories:
