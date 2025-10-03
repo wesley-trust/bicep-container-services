@@ -35,7 +35,13 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.
     infrastructureSubnetResourceId: caeSubnet.id
     internal: true
     publicNetworkAccess: 'Disabled'
-    // zoneRedundant: true
+    zoneRedundant: true
+    workloadProfiles: [
+      {
+        name: 'Consumption'
+        workloadProfileType: 'Consumption'
+      }
+    ]
     location: location
     tags: normalizedTags
   }
