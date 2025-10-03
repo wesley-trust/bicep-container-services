@@ -1,6 +1,6 @@
 # Common/shared variables
 variables:
-  service: cae
+  service: container
   #service: container
   serviceConnection: sc-azure-vse-shared-sub-wif-001
 
