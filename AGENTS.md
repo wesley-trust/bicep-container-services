@@ -3,7 +3,7 @@
 ## Mission Overview
 - **Repository scope:** Bicep automation for Container Services. Provides the deployment artefacts (Bicep, variables, tests) that run through `pipeline-common` via the dispatcher.
 - **Primary pipeline files:** `pipeline/containerservices.pipeline.yml` (user-facing pipeline definition) and `pipeline/containerservices.settings.yml` (dispatcher handshake).
-- **What runs:** `bicep_actions` deploys the resource group and Container Services templates; optional `bicep_tests` executes Pester regression/smoke suites through Azure CLI.
+- **What runs:** `bicep_actions` deploys the resource group and Container Services templates; `bicep_tests` executes Pester regression/smoke suites through Azure CLI with `kind: pester`, so the shared templates publish `TestResults/bicep_tests_<action>.xml` automatically.
 - **Dependencies:** The settings template references `wesley-trust/pipeline-dispatcher` -> which in turn locks `wesley-trust/pipeline-common`. Review those repos when behaviour changes.
 
 ## Directory Map
@@ -17,8 +17,8 @@
 ## Pipeline Flow
 1. `containerservices.pipeline.yml` surfaces pipeline parameters (enable production, skip environments, action toggles, test delay). It extends `containerservices.settings.yml`.
 2. The settings template declares repository resource `PipelineDispatcher` (main branch by default) and re-extends `/templates/pipeline-configuration-dispatcher.yml@PipelineDispatcher`.
-3. Dispatcher merges defaults and forwards the composed `configuration` into `pipeline-common/templates/main.yml`.
-4. `pipeline-common` ensures initialise/validation/review/deploy stages run with the supplied `actionGroups` and environment map. Token replacement and snapshot behaviour come from that repo – see its `AGENTS.md` + `docs/CONFIGURE.md` for details.
+3. Dispatcher merges defaults (including optional fields such as `pipelineType` when you need an environment suffix) and forwards the composed `configuration` into `pipeline-common/templates/main.yml`.
+4. `pipeline-common` ensures initialise/validation/review/deploy stages run with the supplied `actionGroups` and environment map. Token replacement and snapshot behaviour come from that repo – see its `AGENTS.md` + `docs/CONFIGURE.md` for details. When `pipelineType` is set, Azure DevOps environment names inherit the suffix so automated lanes can bypass manual approvals.
 
 ## Customising Deployments
 - Add/edit actions by updating the arrays in `containerservices.pipeline.yml`. Keep the `type`, `scriptTask`, and paths aligned with `pipeline-common` expectations.
@@ -27,7 +27,7 @@
 - Additional repositories or key vault usage should be defined through the `configuration` object in the settings file.
 
 ## Testing & Validation
-- Pester execution is controlled by the `bicep_tests` action group. `scripts/pester_run.ps1` handles module installation and Az login using Azure CLI-provided tokens; ensure tests rely on those connections.
+- Pester execution is controlled by the `bicep_tests` action group. `scripts/pester_run.ps1` handles module installation and Az login using Azure CLI-provided tokens; ensure tests rely on those connections. The PowerShell block sets `kind: pester`, which instructs `pipeline-common` to call `PublishTestResults@2` against `TestResults/bicep_tests_<action>.xml` (override the convention by setting `testResultsFiles` if the script emits elsewhere).
 - Review stage calls `scripts/pester_review.ps1`, which reports metadata without executing tests. Use this to communicate required context to approvers.
 - When updating Bicep, run `az bicep build` locally or rely on the validation stage from `pipeline-common` to catch template issues.
 

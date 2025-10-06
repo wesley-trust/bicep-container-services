@@ -21,7 +21,7 @@ Infrastructure-as-code for the Wesley Trust container services platform. The rep
 3. The dispatcher merges defaults, declares `PipelineCommon`, and calls `templates/main.yml@PipelineCommon` with the composed `configuration` object.
 4. Action groups:
    - `bicep_actions` – deploys the resource group and workload Bicep files, including optional cleanup and delete-on-unmanage switches.
-   - `bicep_tests` – runs the Pester suites via Azure CLI with optional delay and dependency on deployments.
+   - `bicep_tests` – runs the regression and smoke Pester suites via Azure CLI. The group sets `kind: pester`, so `pipeline-common` publishes NUnit results from `TestResults/bicep_tests_<action>.xml` automatically after each run.
 
 ## Local Development
 - Install PowerShell 7, Azure CLI (with Bicep CLI support), and the Az PowerShell module for parity with pipeline execution.

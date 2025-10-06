@@ -30,8 +30,12 @@ parameters:
     default: false
 
   # Bicep test toggles & settings
-  - name: doNotRunBicepTests
-    displayName: "Bicep Tests: Skip All"
+  - name: doNotRunBicepTestsResourceGroup
+    displayName: "Bicep Tests: Skip Resource Group"
+    type: boolean
+    default: false
+  - name: doNotRunBicepTestsContainerServices
+    displayName: "Bicep Tests: Skip Container Services"
     type: boolean
     default: false
   - name: doNotRunRegression
@@ -124,10 +128,11 @@ extends:
             allowDeleteOnUnmanage: ${{ parameters.allowDeleteOnUnmanage }}
             templatePath: platform/containerservices.bicep
             parametersPath: platform/containerservices.bicepparam
-      - name: bicep_tests
-        enabled: ${{ not(parameters.doNotRunBicepTests) }}
+      - name: bicep_tests_resource_group
+        enabled: ${{ not(parameters.doNotRunBicepTestsResourceGroup) }}
         type: powershell
         scriptTask: azureCli
+        kind: pester
         delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
         ${{ if not(parameters.doNotRunBicepActions) }}:
           dependsOn:
@@ -136,8 +141,26 @@ extends:
           - name: regression
             enabled: ${{ not(parameters.doNotRunRegression) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/regression -ResultsFile TestResults/pester.regression.xml"
+            arguments: "-TestsPath tests/regression/resource_group -ResultsFile TestResults/bicep_tests_resource_group_regression.xml"
           - name: smoke
             enabled: ${{ not(parameters.doNotRunSmoke) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/smoke -ResultsFile TestResults/pester.smoke.xml"
+            arguments: "-TestsPath tests/smoke/resource_group -ResultsFile TestResults/bicep_tests_resource_group_smoke.xml"
+      - name: bicep_tests_container_services
+        enabled: ${{ not(parameters.doNotRunBicepTestsContainerServices) }}
+        type: powershell
+        scriptTask: azureCli
+        kind: pester
+        delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
+        ${{ if not(parameters.doNotRunBicepActions) }}:
+          dependsOn:
+            - bicep_actions
+        actions:
+          - name: regression
+            enabled: ${{ not(parameters.doNotRunRegression) }}
+            scriptPath: scripts/pester_run.ps1
+            arguments: "-TestsPath tests/regression/container_services -ResultsFile TestResults/bicep_tests_container_services_regression.xml"
+          - name: smoke
+            enabled: ${{ not(parameters.doNotRunSmoke) }}
+            scriptPath: scripts/pester_run.ps1
+            arguments: "-TestsPath tests/smoke/container_services -ResultsFile TestResults/bicep_tests_container_services_smoke.xml"
