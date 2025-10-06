@@ -1,0 +1,30 @@
+{
+  "deployment": {
+    "scope": "subscription",
+    "location": "uksouth",
+    "parameters": {
+      "deployResourceGroupString": "true",
+      "location": "uksouth",
+      "resourceGroupName": "rg-containerservices-unit-uksouth",
+      "tags": {
+        "environment": "unit",
+        "owner": "containerservices",
+        "service": "containerservices"
+      }
+    }
+  },
+  "resources": [
+    {
+      "resourceType": "Microsoft.Resources/resourceGroups",
+      "resourceName": "rg-containerservices-unit-uksouth",
+      "properties": {
+        "location": "uksouth",
+        "tags": {
+          "environment": "unit",
+          "owner": "containerservices",
+          "service": "containerservices"
+        }
+      }
+    }
+  ]
+}
