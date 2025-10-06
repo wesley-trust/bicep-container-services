@@ -1,6 +1,6 @@
 [CmdletBinding()]
 Param(
-  [string]$DesignPath = "./tests/unit/resource_group/resourcegroup.tests.json"
+  [string]$DesignPath = "./tests/design/resource_group/resourcegroup.tests.json"
 )
 
 BeforeDiscovery {
@@ -14,49 +14,69 @@ BeforeDiscovery {
   $script:ResourceTypes = $Design.resourceType | Sort-Object -Unique
 }
 
-Describe 'Integrity Check' {
-  It 'should have at least one Resource Type' {
-    $ResourceTypes.Count | Should -BeGreaterThan 0
+Describe "Resource Design" {
+  Context "Integrity Check" {
+    It "should have at least one Resource Type" {
+      $ResourceTypes.Count | Should -BeGreaterThan 0
+    }
   }
 }
 
-Describe 'Resource Type <_>' -ForEach $ResourceTypes {
-  param($ResourceType)
+Describe "Resource Type '<_>'" -ForEach $ResourceTypes {
+  $ResourceType = $_
 
   BeforeDiscovery {
+    
     $script:Resources = ($Design | Where-Object { $_.resourceType -eq $ResourceType }).resources
     $Tags = ($Design | Where-Object { $_.resourceType -eq $ResourceType }).tags
 
-    $TagHashTable = @{}
-    $Tags.PSObject.Properties | ForEach-Object { $TagHashTable[$_.Name] = $_.Value }
+    $script:TagsObject = @(
+      $Tags.PSObject.Properties |
+      ForEach-Object { [pscustomobject]@{ Name = $_.Name; Value = $_.Value } }
+    )
   }
 
-  It 'should have at least one Resource' {
-    $script:Resources.Count | Should -BeGreaterThan 0
+  Context "Integrity Check" {
+    It "should have at least one Resource" {
+      $Resources.Count | Should -BeGreaterThan 0
+    }
   }
 
-  Context 'Resource Name <_.name>' -ForEach $Resources {
-    param($Resource)
+  Context "Resource Name '<_.name>'" -ForEach $Resources {
+    $Resource = $_
 
     BeforeDiscovery {
       $script:Properties = $Resource.PSObject.Properties.Name
     }
 
-    It 'should have at least one Property' {
-      $Properties.Count | Should -BeGreaterThan 0
+    Context "Integrity Check" {
+      It "should have at least one Property" {
+        $Properties.Count | Should -BeGreaterThan 0
+      }
+      It "should have at least one Tag" {
+        $TagsObject.Count | Should -BeGreaterThan 0
+      }
     }
 
-    It 'has property <_>' -ForEach $Properties {
-      param(
-        [string]$Property
-      )
-      $Property | Should -Not -BeNullOrEmpty
+    Context "Properties" {
+      It "should have property '<_>'" -ForEach $Properties {
+        $Property = $_
+        $Property | Should -Not -BeNullOrEmpty
+      }
+    }
+
+    Context "Tags" {
+      It "should have tag '<_.Name>' with value '<_.Value>'" -ForEach $TagsObject {
+        $Tag = $_
+        $Tag.Value | Should -Not -BeNullOrEmpty
+      }
     }
   }
+}
 
-  It 'Resources have tag <_.Key> with value <_.Value>' -ForEach $TagHashTable.GetEnumerator() {
-    param($Tag)
-    
-    $Tag.Value | Should -Not -BeNullOrEmpty
-  }
+AfterAll {
+  $script:Properties = $null
+  $script:Resources = $null
+  $script:Design = $null
+  $script:ResourceTypes = $null
 }
