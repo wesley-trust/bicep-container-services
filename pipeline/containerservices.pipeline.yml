@@ -133,34 +133,42 @@ extends:
         type: powershell
         scriptTask: azureCli
         kind: pester
-        delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
         ${{ if not(parameters.doNotRunBicepActions) }}:
           dependsOn:
             - bicep_actions
+        delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
+        tokenReplaceEnabled: true
+        tokenTargetPatterns:
+          - platform/resourcegroup.bicepparam
+          - tests/design/resource_group/**/common.design.json
         actions:
-          - name: regression
+          - name: regression_tests
             enabled: ${{ not(parameters.doNotRunRegression) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/regression/resource_group -ResultsFile TestResults/bicep_tests_resource_group_regression.xml"
-          - name: smoke
+            arguments: "-TestsPath tests/regression/resource_group -ResultsFile TestResults/bicep_tests_resource_group_regression_tests.xml"
+          - name: smoke_tests
             enabled: ${{ not(parameters.doNotRunSmoke) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/smoke/resource_group -ResultsFile TestResults/bicep_tests_resource_group_smoke.xml"
+            arguments: "-TestsPath tests/smoke/resource_group -ResultsFile TestResults/bicep_tests_resource_group_smoke_tests.xml"
       - name: bicep_tests_container_services
         enabled: ${{ not(parameters.doNotRunBicepTestsContainerServices) }}
         type: powershell
         scriptTask: azureCli
         kind: pester
-        delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
         ${{ if not(parameters.doNotRunBicepActions) }}:
           dependsOn:
             - bicep_actions
+        delayMinutes: ${{ parameters.bicepTestsDelayMinutes }}
+        tokenReplaceEnabled: true
+        tokenTargetPatterns:
+          - platform/containerservices.bicepparam
+          - tests/design/container_services/**/common.design.json
         actions:
-          - name: regression
+          - name: regression_tests
             enabled: ${{ not(parameters.doNotRunRegression) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/regression/container_services -ResultsFile TestResults/bicep_tests_container_services_regression.xml"
-          - name: smoke
+            arguments: "-TestsPath tests/regression/container_services -ResultsFile TestResults/bicep_tests_container_services_regression_tests.xml"
+          - name: smoke_tests
             enabled: ${{ not(parameters.doNotRunSmoke) }}
             scriptPath: scripts/pester_run.ps1
-            arguments: "-TestsPath tests/smoke/container_services -ResultsFile TestResults/bicep_tests_container_services_smoke.xml"
+            arguments: "-TestsPath tests/smoke/container_services -ResultsFile TestResults/bicep_tests_container_services_smoke_tests.xml"
