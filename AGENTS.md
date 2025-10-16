@@ -3,7 +3,7 @@
 ## Mission Overview
 - **Repository scope:** Bicep automation for Container Services. Provides the deployment artefacts (Bicep, variables, tests) that run through `pipeline-common` via the dispatcher.
 - **Primary pipeline files:** `pipeline/containerservices.pipeline.yml` (user-facing pipeline definition) and `pipeline/containerservices.settings.yml` (dispatcher handshake).
-- **What runs:** `bicep_actions` deploys the resource group and Container Services templates; `bicep_tests` executes Pester regression/smoke suites through Azure CLI with `kind: pester`, so the shared templates publish `TestResults/bicep_tests_<action>.xml` automatically.
+- **What runs:** `bicep_actions` deploys the resource group and Container Services templates; `bicep_tests_resource_group` and `bicep_tests_container_services` execute their Pester regression/smoke suites through Azure CLI with `kind: pester`, so the shared templates publish `TestResults/<actionGroup>_<action>.xml` automatically.
 - **Dependencies:** The settings template references `wesley-trust/pipeline-dispatcher` -> which in turn locks `wesley-trust/pipeline-common`. Review those repos when behaviour changes.
 
 ## Directory Map
@@ -11,7 +11,7 @@
 - `platform/` – Bicep templates and parameter files (`resourcegroup` bootstrap + `containerservices`). Keep names matched with the paths wired in the pipeline action definitions.
 - `vars/` – YAML variable layers (`common`, `regions/*`). Loaded by `pipeline-common` according to include flags/defaults.
 - `scripts/` – PowerShell helpers invoked from action groups (Pester runner, review metadata, sample pre/post hooks). Execution happens inside the pipeline snapshot.
-- `tests/` – Pester suites split by concern (`smoke`, `regression`, etc.). Align folder names with action definitions.
+- `tests/` – Pester suites split by concern (`smoke`, `regression`, etc.). Align folder names with action definitions and keep shared data in `tests/design/` for cross-suite reuse.
 - `AGENTS.md` – this handbook. Update alongside structural changes.
 
 ## Pipeline Flow
@@ -27,7 +27,7 @@
 - Additional repositories or key vault usage should be defined through the `configuration` object in the settings file.
 
 ## Testing & Validation
-- Pester execution is controlled by the `bicep_tests` action group. `scripts/pester_run.ps1` handles module installation and Az login using Azure CLI-provided tokens; ensure tests rely on those connections. The PowerShell block sets `kind: pester`, which instructs `pipeline-common` to call `PublishTestResults@2` against `TestResults/bicep_tests_<action>.xml` (override the convention by setting `testResultsFiles` if the script emits elsewhere).
+- Pester execution is controlled by the `bicep_tests_resource_group` and `bicep_tests_container_services` action groups. `scripts/pester_run.ps1` handles module installation and Az login using Azure CLI-provided tokens, and accepts optional `-TestData` input when you need to supply fixtures manually. Both action groups set `kind: pester`, so `pipeline-common` publishes results to `TestResults/<actionGroup>_<action>.xml` unless overridden.
 - Review stage calls `scripts/pester_review.ps1`, which reports metadata without executing tests. Use this to communicate required context to approvers.
 - When updating Bicep, run `az bicep build` locally or rely on the validation stage from `pipeline-common` to catch template issues.
 

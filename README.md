@@ -13,7 +13,7 @@ Infrastructure-as-code for the Wesley Trust container services platform. The rep
 - `pipeline/` – Pipeline definition (`*.pipeline.yml`) and dispatcher settings (`*.settings.yml`). Edit these to expose new toggles or action groups.
 - `vars/` – YAML variable layers (`common.yml`, `regions/*.yml`) automatically imported by `pipeline-common` when include flags are enabled.
 - `scripts/` – PowerShell helpers invoked from the pipeline (Pester runners plus sample pre/post hooks).
-- `tests/` – Pester suites (`regression`, `smoke`, optional `unit`/`integration`) executed through the `bicep_tests` action group.
+- `tests/` – Pester suites (`regression`, `smoke`, plus optional `unit`/`integration`) executed through the `bicep_tests_resource_group` and `bicep_tests_container_services` action groups. Shared fixtures live in `tests/design/`.
 
 ## Pipeline Overview
 1. `containerservices.pipeline.yml` exposes runtime parameters (environment skips, review toggles, DR invocation, test controls) and extends the settings template.
@@ -21,7 +21,12 @@ Infrastructure-as-code for the Wesley Trust container services platform. The rep
 3. The dispatcher merges defaults, declares `PipelineCommon`, and calls `templates/main.yml@PipelineCommon` with the composed `configuration` object.
 4. Action groups:
    - `bicep_actions` – deploys the resource group and workload Bicep files, including optional cleanup and delete-on-unmanage switches.
-   - `bicep_tests` – runs the regression and smoke Pester suites via Azure CLI. The group sets `kind: pester`, so `pipeline-common` publishes NUnit results from `TestResults/bicep_tests_<action>.xml` automatically after each run.
+   - `bicep_tests_resource_group` – runs the resource-group regression and smoke Pester suites via Azure CLI. Results are written to `TestResults/bicep_tests_resource_group_<action>.xml` unless overridden.
+   - `bicep_tests_container_services` – runs the container-services regression and smoke suites with the same execution pattern, publishing to `TestResults/bicep_tests_container_services_<action>.xml`.
+
+## Test Fixtures
+- `tests/design/resource_group/resourcegroup.tests.json` centralises resource-group expectations that can be passed into suites through the `TestData` parameter.
+- Add additional fixture files under `tests/design/<area>/` when new suites need shared data. Update pipeline `tokenTargetPatterns` if new paths require variable substitution.
 
 ## Local Development
 - Install PowerShell 7, Azure CLI (with Bicep CLI support), and the Az PowerShell module for parity with pipeline execution.
