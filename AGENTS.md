@@ -3,14 +3,14 @@
 ## Mission Overview
 - **Repository scope:** Bicep automation for Container Services. Contains the infrastructure templates, configuration, and tests executed through the shared pipeline stack (dispatcher -> pipeline-common).
 - **Primary pipeline files:** `pipeline/containerservices.pipeline.yml` exposes Azure DevOps parameters; `pipeline/containerservices.settings.yml` links to the dispatcher and forwards configuration. The CI-focused `pipeline/containerservices.tests.pipeline.yml` runs the same suites without deployments.
-- **Action groups:** `bicep_actions` deploys the resource group then the container services Bicep module. `bicep_tests_resource_group` and `bicep_tests_container_services` execute Pester suites via Azure CLI with `kind: pester`, so the shared templates publish `TestResults/<actionGroup>_<action>.xml` automatically.
+- **Action groups:** `bicep_actions` deploys the resource group then the container services Bicep module. `bicep_tests_resource_group` and `bicep_tests_container_services` execute Pester suites via Azure CLI with `kind: pester`, so the shared templates publish `TestResults/<actionGroup>_<action>.xml` automatically. The release pipeline adds a `github_release` PowerShell action with `kind: release`; it calls `scripts/release_semver.ps1` to tag the repository and publish a GitHub release.
 - **Dependencies:** The settings template references `wesley-trust/pipeline-dispatcher`, which locks `wesley-trust/pipeline-common`. Review those repos when diagnosing pipeline behaviour.
 
 ## Directory Map
 - `pipeline/` – Pipeline definition + settings (deployment and CI variants). Edit these when introducing new parameters, toggles, or action groups.
 - `platform/` – Bicep templates (`resourcegroup`, `containerservices`) and parameter files referenced by the pipeline actions.
 - `vars/` – Layered YAML variables (`common`, `regions/*`, `environments/*`). Loaded by `pipeline-common` based on include flags supplied via configuration.
-- `scripts/` – PowerShell helpers invoked from pipeline actions (Pester run/review, example hooks). Executed within the locked pipeline snapshot.
+- `scripts/` – PowerShell helpers invoked from pipeline actions (Pester run/review, release automation, example hooks). Executed within the locked pipeline snapshot.
 - `tests/` – Pester suites grouped into `unit`, `integration`, `smoke`, and `regression`. Shared design fixtures under `tests/design/` expose `tags`, `health`, and per-resource property sets consumed by the suites. Sample what-if payloads live in `tests/design/*/bicep.whatif.json` for review-stage context.
 
 ## Pipeline Execution Flow
