@@ -28,7 +28,7 @@
 
 ## Testing & Validation
 - Pester execution is controlled by the `bicep_tests_resource_group` and `bicep_tests_container_services` action groups. `scripts/pester_run.ps1` handles module installation and Az login using Azure CLI-provided tokens, and accepts optional `-TestData` input when you need to supply fixtures manually. Both action groups set `kind: pester`, so `pipeline-common` publishes results to `TestResults/<actionGroup>_<action>.xml` unless overridden.
-- Review stage calls `scripts/pester_review.ps1`, which reports metadata without executing tests. Use this to communicate required context to approvers.
+- Review stage relies on pipeline-common’s Bicep what-if output. `scripts/pester_review.ps1` is available for future review tasks if we decide to add dedicated PowerShell review actions.
 - When updating Bicep, run `az bicep build` locally or rely on the validation stage from `pipeline-common` to catch template issues.
 
 ## When Behaviour Changes
