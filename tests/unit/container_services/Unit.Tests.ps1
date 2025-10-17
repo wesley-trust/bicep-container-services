@@ -7,8 +7,8 @@ Param(
   [ValidateSet("Full", "Environment", "Region")][string]$DesignPathSwitch = "Region",
   [string]$ResourceGroupTemplateFile = "./platform/resourcegroup.bicep",
   [string]$ResourceGroupParameterFile = "./platform/resourcegroup.bicepparam",
-  [string]$ResourceTemplateFile = "./platform/networkservices.bicep",
-  [string]$ResourceParameterFile = "./platform/networkservices.bicepparam",
+  [string]$ResourceTemplateFile = "./platform/containerservices.bicep",
+  [string]$ResourceParameterFile = "./platform/containerservices.bicepparam",
   [string]$ResourceGroupName = $ENV:RESOURCEGROUP,
   [string]$Name
 )
