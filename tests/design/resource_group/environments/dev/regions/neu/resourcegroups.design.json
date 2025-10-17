@@ -1,0 +1,17 @@
+{
+  "resourceType": "Microsoft.Resources/resourceGroups",
+  "tags": {
+    "environment": "dev",
+    "owner": "platform-team",
+    "service": "container"
+  },
+  "health": {
+    "provisioningState": "Succeeded"
+  },
+  "resources": [
+    {
+      "name": "rg-container-dev-neu-#{{ deploymentVersion }}",
+      "location": "northeurope"
+    }
+  ]
+}

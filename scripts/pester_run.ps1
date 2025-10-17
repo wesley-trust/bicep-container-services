@@ -1,5 +1,6 @@
 param(
-  [Parameter(Mandatory = $true)][string]$TestsPath,
+  [Parameter(Mandatory = $true)][string]$PathRoot,
+  [Parameter(Mandatory = $true)][string]$Type,
   [Parameter(Mandatory = $true)][string]$ResultsFile,
   [string]$ResultsFormat = 'NUnitXml',
   [hashtable]$TestData
@@ -10,7 +11,6 @@ $ErrorActionPreference = 'Stop'
 
 try {
   if (-not (Get-Module -ListAvailable -Name Pester)) {
-    Register-PSRepository -Default
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
     Install-Module Pester -Scope CurrentUser -Force
   }
@@ -21,7 +21,6 @@ try {
 
   # Install the Az module if not already available
   if (-not (Get-Module -ListAvailable -Name Az)) {
-    Register-PSRepository -Default
     Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted
     Install-Module -Name Az -Scope CurrentUser -Force
   }
@@ -32,7 +31,7 @@ try {
     -ApplicationId $env:servicePrincipalId `
     -FederatedToken $env:idToken
 
-  $containerArgs = @{ Path = $TestsPath }
+  $containerArgs = @{ Path = "$PathRoot/$Type/$($TestData.Name)" }
   if ($PSBoundParameters.ContainsKey('TestData') -and $null -ne $TestData) {
     $containerArgs.Data = $TestData
   }

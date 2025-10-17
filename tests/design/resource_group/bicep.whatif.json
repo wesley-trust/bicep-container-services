@@ -1,0 +1,17 @@
+{
+  "changes": [
+    {
+      "changeType": "Create",
+      "after": {
+        "type": "Microsoft.Resources/resourceGroups",
+        "name": "rg-container-dev-weu-#{{ deploymentVersion }}",
+        "location": "westeurope",
+        "tags": {
+          "environment": "dev",
+          "owner": "platform-team",
+          "service": "container"
+        }
+      }
+    }
+  ]
+}
