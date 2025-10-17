@@ -1,4 +1,2 @@
 variables:
   environment: ppr
-  sku: ppr-sku
-

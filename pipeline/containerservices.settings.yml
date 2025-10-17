@@ -51,11 +51,11 @@ extends:
 
       # Configuration Override
       pipelineType: ${{ parameters.pipelineType }}
-      variables:
-        includeCommon: true
-        includeEnv: true
-        includeEnvRegion: true
-        includeRegion: true
+      # variables:
+      #   includeCommon: true
+      #   includeEnv: true
+      #   includeEnvRegion: true
+      #   includeRegion: true
 
     # Environments Override
     # environments:
