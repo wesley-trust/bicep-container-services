@@ -1,0 +1,17 @@
+{
+  "resourceType": "Microsoft.App/managedEnvironments",
+  "tags": {
+    "environment": "dev",
+    "owner": "platform-team",
+    "service": "container"
+  },
+  "health": {
+    "provisioningState": "Succeeded"
+  },
+  "resources": [
+    {
+      "name": "cae-container-dev-neu-#{{ caeInstanceVersion }}",
+      "location": "northeurope"
+    }
+  ]
+}

@@ -1,47 +1,51 @@
 # bicep-container-services
 
-Infrastructure-as-code for the Wesley Trust container services platform. The repository packages Bicep templates, configuration, and automated tests that run through the shared pipeline stack (`pipeline-dispatcher` -> `pipeline-common`).
+Infrastructure-as-code for Wesley Trust container services. The repository packages Bicep templates, configuration, and automated tests that run through the shared pipeline stack (`pipeline-dispatcher` -> `pipeline-common`).
 
 ## Quick Links
-- `AGENTS.md` – AI-facing handbook covering action groups, tests, and dependency repos.
-- `pipeline/containerservices.pipeline.yml` – user-facing Azure DevOps pipeline definition.
-- `pipeline/containerservices.settings.yml` – dispatcher handshake that forwards configuration.
-- `pipeline-common/docs/CONFIGURE.md` – canonical description of the configuration schema consumed by shared templates.
+- `AGENTS.md` – AI-focused handbook covering action groups, tests, and dependency repos.
+- `pipeline/containerservices.pipeline.yml` – Azure DevOps pipeline definition with runtime parameters.
+- `pipeline/containerservices.tests.pipeline.yml` – CI/scheduled tests pipeline built on the same dispatcher handshake.
+- `pipeline/containerservices.settings.yml` – dispatcher handshake that forwards configuration into `pipeline-common`.
+- `pipeline-common/docs/CONFIGURE.md` – canonical schema reference for configuration payloads.
 
 ## Repository Layout
-- `platform/` – Bicep artefacts. `resourcegroup.bicep` bootstraps prerequisite RGs; `containerservices.bicep` delivers the workload. Matching `.bicepparam` files capture defaults.
-- `pipeline/` – Pipeline definition (`*.pipeline.yml`) and dispatcher settings (`*.settings.yml`). Edit these to expose new toggles or action groups.
-- `vars/` – YAML variable layers (`common.yml`, `regions/*.yml`) automatically imported by `pipeline-common` when include flags are enabled.
-- `scripts/` – PowerShell helpers invoked from the pipeline (Pester runners plus sample pre/post hooks).
-- `tests/` – Pester suites (`regression`, `smoke`, plus optional `unit`/`integration`) executed through the `bicep_tests_resource_group` and `bicep_tests_container_services` action groups. Shared fixtures live in `tests/design/`.
+- `platform/` – Bicep artefacts. `resourcegroup.bicep` prepares prerequisite RGs; `containerservices.bicep` deploys the Azure Container Apps environment. Matching `.bicepparam` files capture tokenised defaults.
+- `pipeline/` – Pipeline definition and dispatcher settings. Update these files when exposing new toggles, action groups, or test pipelines.
+- `vars/` – YAML variable layers (`common.yml`, `regions/*.yml`, `environments/*`) that `pipeline-common` loads according to include flags.
+- `scripts/` – PowerShell helpers invoked from pipeline action groups (Pester runner/review plus sample pre/post hooks).
+- `tests/` – Pester suites grouped into `unit`, `integration`, `smoke`, and `regression`. Design fixtures now live under `tests/design/resource_group/**` and `tests/design/container_services/**`, with per-region JSON describing expected resources, tags, and health.
 
 ## Pipeline Overview
-1. `containerservices.pipeline.yml` exposes runtime parameters (environment skips, review toggles, DR invocation, test controls) and extends the settings template.
+1. `containerservices.pipeline.yml` introduces parameters for production enablement, DR invocation, environment skips, and action-group toggles before extending the settings template.
 2. `containerservices.settings.yml` declares repository resource `PipelineDispatcher` and extends `/templates/pipeline-configuration-dispatcher.yml@PipelineDispatcher`.
 3. The dispatcher merges defaults, declares `PipelineCommon`, and calls `templates/main.yml@PipelineCommon` with the composed `configuration` object.
 4. Action groups:
-   - `bicep_actions` – deploys the resource group and workload Bicep files, including optional cleanup and delete-on-unmanage switches.
-   - `bicep_tests_resource_group` – runs the resource-group regression and smoke Pester suites via Azure CLI. Results are written to `TestResults/bicep_tests_resource_group_<action>.xml` unless overridden.
-   - `bicep_tests_container_services` – runs the container-services regression and smoke suites with the same execution pattern, publishing to `TestResults/bicep_tests_container_services_<action>.xml`.
+   - `bicep_actions` – deploys the resource group followed by the container services Bicep module, with optional cleanup and delete-on-unmanage switches.
+   - `bicep_tests_resource_group` and `bicep_tests_container_services` – execute Pester suites through Azure CLI. Each action passes a scoped fixture via `-TestData` so the runner can resolve paths like `tests/<type>/<service>`, and both groups rely on `kind: pester`, which triggers `pipeline-common` to publish NUnit results to `TestResults/<actionGroup>_<action>.xml`.
 
-## Test Fixtures
-- `tests/design/resource_group/resourcegroup.tests.json` centralises resource-group expectations that can be passed into suites through the `TestData` parameter.
-- Add additional fixture files under `tests/design/<area>/` when new suites need shared data. Update pipeline `tokenTargetPatterns` if new paths require variable substitution.
+The dedicated tests pipeline (`containerservices.tests.pipeline.yml`) passes `pipelineType: auto` and sets `globalDependsOn: validation`, ensuring CI and scheduled jobs wait for template validation. CI-facing action groups (`bicep_tests_*_ci`) enable `variableOverridesEnabled` with `dynamicDeploymentVersionEnabled: true`, allowing `templates/variables/include-overrides.yml` to append a unique suffix to `deploymentVersion` per run so parallel test executions stay isolated.
+
+## Test Fixtures and Health Checks
+- Design files under `tests/design/container_services/**` expose a top-level `health` object (currently `provisioningState`) alongside resource properties. Smoke tests assert these health keys directly against live Container Apps environments to provide a fast readiness signal without expanding property skip matrices.
+- Regression and integration suites consume the same design data, filtering properties as required while still validating tags and baseline metadata.
+- Resource-group fixtures live under `tests/design/resource_group/**` and are passed into the runner the same way.
+- Sample Azure CLI What-If payloads live in `tests/design/*/bicep.whatif.json` to illustrate expected review-stage output.
 
 ## Local Development
-- Install PowerShell 7, Azure CLI (with Bicep CLI support), and the Az PowerShell module for parity with pipeline execution.
-- Run `pwsh -File scripts/pester_run.ps1 -TestsPath tests/smoke -ResultsFile ./TestResults/local.smoke.xml` to exercise tests locally. Provide Azure credentials via `Connect-AzAccount` (service principal or interactive) before execution.
-- Use `az bicep build platform/containerservices.bicep` for quick syntax validation during development.
+- Install PowerShell 7, Azure CLI (with Bicep CLI support), and the Az PowerShell module to mirror pipeline execution.
+- Exercise tests locally using `pwsh -File scripts/pester_run.ps1 -PathRoot tests -Type smoke -TestData @{ Name = 'container_services' } -ResultsFile ./TestResults/local.smoke.xml`, authenticating with Azure beforehand. Swap `smoke` with `regression`, `unit`, or `integration` (and adjust `Name`) to target other suites.
+- Run `az bicep build platform/containerservices.bicep` for syntax validation while authoring templates.
 
 ## Configuration Tips
-- Modify environment metadata (pools, regions, approvals) by extending the `configuration` object within `containerservices.settings.yml`.
-- Additional repositories, key vault integration, or variable include behaviour are controlled through the same configuration payload; see `pipeline-common/docs/CONFIGURE.md` for available fields.
-- Keep variable definitions under `vars/` small and environment-specific. Enable or disable layers via `configuration.variables.include*` flags.
+- Tune environment metadata (pools, regions, approvals) by editing the configuration payload in `containerservices.settings.yml`.
+- Manage variable layers under `vars/` and control their inclusion with `configuration.variables.include*` flags.
+- Additional repositories, key vault integration, and advanced validation options follow the schema defined in `pipeline-common/docs/CONFIGURE.md`.
 
 ## Releasing Changes
-- Update `README.md` and `AGENTS.md` when introducing new parameters, action groups, or major behavioural tweaks.
-- Coordinate dispatcher default changes with the `pipeline-dispatcher` repo to ensure consumers stay compatible.
-- When breaking infrastructure changes are required, document migration guidance in pull requests and ensure regression tests cover the new path.
+- Document new parameters or action groups in both `README.md` and `AGENTS.md` to keep operators informed.
+- Coordinate dispatcher default updates with the `pipeline-dispatcher` team to avoid schema drift.
+- Cover breaking infrastructure changes with regression tests and clear migration notes in pull requests.
 
 ## Support
-Raise questions in the platform DevOps channel or the repository issue tracker. Include the pipeline run ID, branch, and any custom configuration overrides when reporting deployment issues.
+Use the platform DevOps channel or this repository’s issue tracker for support. Include pipeline run details, branch, and relevant configuration overrides when reporting problems.
