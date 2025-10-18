@@ -4,7 +4,7 @@ Infrastructure-as-code for Wesley Trust container services. The repository packa
 
 ## Quick Links
 - `AGENTS.md` – AI-focused handbook covering action groups, tests, and dependency repos.
-- `pipeline/containerservices.pipeline.yml` – Azure DevOps pipeline definition with runtime parameters.
+- `pipeline/containerservices.deploy.pipeline.yml` – Azure DevOps pipeline definition with runtime parameters.
 - `pipeline/containerservices.tests.pipeline.yml` – CI/scheduled tests pipeline built on the same dispatcher handshake.
 - `pipeline/containerservices.release.pipeline.yml` – semantic-release pipeline that tags the repo and publishes GitHub releases.
 - `pipeline/containerservices.settings.yml` – dispatcher handshake that forwards configuration into `pipeline-common`.
@@ -18,7 +18,7 @@ Infrastructure-as-code for Wesley Trust container services. The repository packa
 - `tests/` – Pester suites grouped into `unit`, `integration`, `smoke`, and `regression`. Design fixtures now live under `tests/design/resource_group/**` and `tests/design/container_services/**`, with per-region JSON describing expected resources, tags, and health.
 
 ## Pipeline Overview
-1. `containerservices.pipeline.yml` introduces parameters for production enablement, DR invocation, environment skips, and action-group toggles before extending the settings template.
+1. `containerservices.deploy.pipeline.yml` introduces parameters for production enablement, DR invocation, environment skips, and action-group toggles before extending the settings template.
 2. `containerservices.settings.yml` declares repository resource `PipelineDispatcher` and extends `/templates/pipeline-configuration-dispatcher.yml@PipelineDispatcher`.
 3. The dispatcher merges defaults, declares `PipelineCommon`, and calls `templates/main.yml@PipelineCommon` with the composed `configuration` object.
 4. Action groups:
