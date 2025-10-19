@@ -7,6 +7,9 @@ param tags = {
   service: '#{{ service }}'
 }
 
+// Service
+param deployServiceString = '#{{ deployService }}'
+
 // Virtual Network
 param virtualNetworkName = '#{{ vnet-001-name }}'
 param containerAppsEnvironmentSubnetName = '#{{ snet-001-name }}'
