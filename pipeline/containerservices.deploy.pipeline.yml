@@ -87,20 +87,16 @@ parameters:
     default: false
 
   # Operational flags
-  - name: allowUnmanage
-    displayName: "Temporarily Unmanage Resources"
-    type: boolean
-    default: false
-  - name: allowDeleteOnUnmanage
-    displayName: "Temporarily Allow Delete on Unmanage"
-    type: boolean
-    default: false
   - name: cleanupSubscriptionStack
-    displayName: "Cleanup Subscription Stack (Unmanage Resources)"
+    displayName: "Cleanup Subscription Stack (Unmanage Resource Group)"
     type: boolean
     default: false
   - name: cleanupResourceGroupStack
     displayName: "Cleanup Resource Group Stack (Unmanage Resources)"
+    type: boolean
+    default: false
+  - name: allowDeleteOnUnmanage
+    displayName: "Temporarily Allow Delete on Unmanage"
     type: boolean
     default: false
 
@@ -121,9 +117,6 @@ extends:
       - name: bicep_actions
         enabled: ${{ not(parameters.doNotRunBicepActions) }}
         type: bicep
-        variableOverridesEnabled: ${{ parameters.allowUnmanage }}
-        variableOverrides:
-          deployService: ${{ not(parameters.allowUnmanage) }}
         tokenReplaceEnabled: true
         actions:
           - name: resource_group
