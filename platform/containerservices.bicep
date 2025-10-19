@@ -6,8 +6,12 @@ param location string = resourceGroup().location
 
 @description('Optional tags applied to the resources.')
 param tags object = {}
-
 var normalizedTags = empty(tags) ? null : tags
+
+// Service
+@description('Flag to determine whether to deploy Container Services. Set to true to deploy, false to skip deployment. Accepted values: "true", "false".')
+param deployServiceString string
+var deployService = bool(deployServiceString)
 
 // Virtual Network
 param virtualNetworkName string
@@ -35,7 +39,7 @@ param containerAppsEnvironmentName string
 @description('Name of the resource group where the load balancer is located.')
 param infrastructureResourceGroupName string
 
-module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.3' = if (deployContainerAppsEnvironment == true) {
+module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.3' = if (deployService && deployContainerAppsEnvironment) {
   params: {
     name: containerAppsEnvironmentName
     infrastructureSubnetResourceId: caeSubnet.id

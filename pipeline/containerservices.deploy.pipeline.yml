@@ -63,6 +63,10 @@ parameters:
       - 60
 
   # Operational flags
+  - name: allowUnmanage
+    displayName: "Temporarily Unmanage Resources"
+    type: boolean
+    default: false
   - name: allowDeleteOnUnmanage
     displayName: "Temporarily Allow Delete on Unmanage"
     type: boolean
@@ -113,6 +117,9 @@ extends:
       - name: bicep_actions
         enabled: ${{ not(parameters.doNotRunBicepActions) }}
         type: bicep
+        variableOverridesEnabled: ${{ parameters.allowUnmanage }}
+        variableOverrides:
+          deployService: false
         tokenReplaceEnabled: true
         actions:
           - name: resource_group
