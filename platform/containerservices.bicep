@@ -9,7 +9,7 @@ param tags object = {}
 var normalizedTags = empty(tags) ? null : tags
 
 // Service
-@description('Flag to determine whether to deploy Container Services. Set to true to deploy, false to skip deployment. Accepted values: "true", "false".')
+@description('Flag to determine whether to deploy the service. Set to true to deploy, false to skip deployment. Accepted values: "true", "false".')
 param deployServiceString string
 var deployService = bool(deployServiceString)
 

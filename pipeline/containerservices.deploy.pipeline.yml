@@ -62,20 +62,6 @@ parameters:
       - 45
       - 60
 
-  # Operational flags
-  - name: allowUnmanage
-    displayName: "Temporarily Unmanage Resources"
-    type: boolean
-    default: false
-  - name: allowDeleteOnUnmanage
-    displayName: "Temporarily Allow Delete on Unmanage"
-    type: boolean
-    default: false
-  - name: cleanupResourceGroupStack
-    displayName: "Cleanup Resource Group Stack"
-    type: boolean
-    default: false
-
   # Environment skips
   - name: skip_dev
     displayName: "Skip Environments: Development"
@@ -100,6 +86,24 @@ parameters:
     type: boolean
     default: false
 
+  # Operational flags
+  - name: allowUnmanage
+    displayName: "Temporarily Unmanage Resources"
+    type: boolean
+    default: false
+  - name: allowDeleteOnUnmanage
+    displayName: "Temporarily Allow Delete on Unmanage"
+    type: boolean
+    default: false
+  - name: cleanupSubscriptionStack
+    displayName: "Cleanup Subscription Stack"
+    type: boolean
+    default: false
+  - name: cleanupResourceGroupStack
+    displayName: "Cleanup Resource Group Stack"
+    type: boolean
+    default: false
+
 extends:
   template: containerservices.settings.yml
   parameters:
@@ -119,7 +123,7 @@ extends:
         type: bicep
         variableOverridesEnabled: ${{ parameters.allowUnmanage }}
         variableOverrides:
-          deployService: false
+          deployService: ${{ not(parameters.allowUnmanage) }}
         tokenReplaceEnabled: true
         actions:
           - name: resource_group
@@ -128,7 +132,7 @@ extends:
             resourceGroupName: $(resourceGroup)
             location: $(region)
             allowDeleteOnUnmanage: ${{ parameters.allowDeleteOnUnmanage}}
-            cleanupStack: ${{ parameters.cleanupResourceGroupStack }}
+            cleanupStack: ${{ parameters.cleanupSubscriptionStack }}
             templatePath: platform/resourcegroup.bicep
             parametersPath: platform/resourcegroup.bicepparam
           - name: container_services
@@ -137,6 +141,7 @@ extends:
             resourceGroupName: $(resourceGroup)
             location: $(region)
             allowDeleteOnUnmanage: ${{ parameters.allowDeleteOnUnmanage }}
+            cleanupStack: ${{ parameters.cleanupResourceGroupStack }}
             templatePath: platform/containerservices.bicep
             parametersPath: platform/containerservices.bicepparam
       - name: bicep_tests_resource_group
