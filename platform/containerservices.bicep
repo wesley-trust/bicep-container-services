@@ -6,7 +6,7 @@ param location string = resourceGroup().location
 
 @description('Optional tags applied to the resources.')
 param tags object = {}
-var normalizedTags = empty(tags) ? null : tags
+var normalisedTags = empty(tags) ? null : tags
 
 // Service
 @description('Flag to determine whether to deploy the service. Set to true to deploy, false to skip deployment. Accepted values: "true", "false".')
@@ -54,6 +54,6 @@ module containerAppsEnvironment 'br/public:avm/res/app/managed-environment:0.11.
       }
     ]
     location: location
-    tags: normalizedTags
+    tags: normalisedTags
   }
 }
