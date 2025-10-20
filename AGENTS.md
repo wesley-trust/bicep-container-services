@@ -2,7 +2,7 @@
 
 ## Mission Overview
 - **Repository scope:** Bicep automation for Container Services. Contains the infrastructure templates, configuration, and tests executed through the shared pipeline stack (dispatcher -> pipeline-common).
-- **Primary pipeline files:** `pipeline/containerservices.deploy.pipeline.yml` exposes Azure DevOps parameters; `pipeline/containerservices.settings.yml` links to the dispatcher and forwards configuration. The CI-focused `pipeline/containerservices.tests.pipeline.yml` runs the same suites without deployments.
+- **Primary pipeline files:** `pipeline/containerservices.deploy.pipeline.yml` exposes Azure DevOps parameters; `pipeline/containerservices.settings.yml` links to the dispatcher and forwards configuration. The CI-focused `pipeline/containerservices.test.pipeline.yml` runs the same suites without deployments.
 - **Action groups:** `bicep_actions` deploys the resource group then the container services Bicep module. `bicep_tests_resource_group` and `bicep_tests_container_services` execute Pester suites via Azure CLI with `kind: pester`, so the shared templates publish `TestResults/<actionGroup>_<action>.xml` automatically. The release pipeline adds a `github_release` PowerShell action with `kind: release`; it calls `scripts/release_semver.ps1` to tag the repository and publish a GitHub release.
 - **Dependencies:** The settings template references `wesley-trust/pipeline-dispatcher`, which locks `wesley-trust/pipeline-common`. Review those repos when diagnosing pipeline behaviour.
 
@@ -29,7 +29,7 @@
 - `scripts/pester_run.ps1` installs required modules, authenticates with the federated token passed from Azure CLI, and executes Pester with NUnit output. It expects `-PathRoot`, `-Type`, and `-TestData.Name` so the runner can locate suites like `tests/<type>/<service>`. Ensure new tests live under `tests/` and are referenced by the action group.
 - Smoke suites validate the `health` object emitted by each design file (for example, `provisioningState`) to give a quick readiness signal without broad property asserts. Expand the health payload when additional status checks are needed.
 - Review stage relies on pipeline-common’s Bicep what-if output for approval context. `scripts/pester_review.ps1` ships for future opt-in review tasks but is not wired into the current pipeline definitions.
-- CI action groups in `containerservices.tests.pipeline.yml` enable `variableOverridesEnabled` and pass `dynamicDeploymentVersionEnabled: true`. The helper template `PipelineCommon/templates/variables/include-overrides.yml` uses this to generate unique deployment versions per run, keeping parallel tests isolated.
+- CI action groups in `containerservices.test.pipeline.yml` enable `variableOverridesEnabled` and pass `dynamicDeploymentVersionEnabled: true`. The helper template `PipelineCommon/templates/variables/include-overrides.yml` uses this to generate unique deployment versions per run, keeping parallel tests isolated.
 - Bicep syntax/what-if validation runs through `pipeline-common` validation/review stages; run `az bicep build` locally for quick feedback before pushing.
 
 ## Operational Notes

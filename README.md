@@ -5,7 +5,7 @@ Infrastructure-as-code for Wesley Trust container services. The repository packa
 ## Quick Links
 - `AGENTS.md` – AI-focused handbook covering action groups, tests, and dependency repos.
 - `pipeline/containerservices.deploy.pipeline.yml` – Azure DevOps pipeline definition with runtime parameters.
-- `pipeline/containerservices.tests.pipeline.yml` – CI/scheduled tests pipeline built on the same dispatcher handshake.
+- `pipeline/containerservices.test.pipeline.yml` – CI/scheduled tests pipeline built on the same dispatcher handshake.
 - `pipeline/containerservices.publish.pipeline.yml` – semantic-release pipeline that tags the repo and publishes GitHub releases.
 - `pipeline/containerservices.settings.yml` – dispatcher handshake that forwards configuration into `pipeline-common`.
 - `pipeline-common/docs/CONFIGURE.md` – canonical schema reference for configuration payloads.
@@ -25,7 +25,7 @@ Infrastructure-as-code for Wesley Trust container services. The repository packa
    - `bicep_actions` – deploys the resource group followed by the container services Bicep module, with optional cleanup and delete-on-unmanage switches.
    - `bicep_tests_resource_group` and `bicep_tests_container_services` – execute Pester suites through Azure CLI. Each action passes a scoped fixture via `-TestData` so the runner can resolve paths like `tests/<type>/<service>`, and both groups rely on `kind: pester`, which triggers `pipeline-common` to publish NUnit results to `TestResults/<actionGroup>_<action>.xml`.
 
-The dedicated tests pipeline (`containerservices.tests.pipeline.yml`) passes `pipelineType: auto` and sets `globalDependsOn: validation`, ensuring CI and scheduled jobs wait for template validation. CI-facing action groups (`bicep_tests_*_ci`) enable `variableOverridesEnabled` with `dynamicDeploymentVersionEnabled: true`, allowing `templates/variables/include-overrides.yml` to append a unique suffix to `deploymentVersion` per run so parallel test executions stay isolated.
+The dedicated tests pipeline (`containerservices.test.pipeline.yml`) passes `pipelineType: auto` and sets `globalDependsOn: validation`, ensuring CI and scheduled jobs wait for template validation. CI-facing action groups (`bicep_tests_*_ci`) enable `variableOverridesEnabled` with `dynamicDeploymentVersionEnabled: true`, allowing `templates/variables/include-overrides.yml` to append a unique suffix to `deploymentVersion` per run so parallel test executions stay isolated.
 
 The release pipeline (`containerservices.publish.pipeline.yml`) also runs with `pipelineType: auto`. It executes `scripts/release_semver.ps1` after every successful `main` build to derive the semantic version from the squash-merge commit message, create/push the tag, and surface release metadata. A PowerShell action with `kind: release` then wraps the shared GitHub release helper to publish the release entry using the exported variables.
 
