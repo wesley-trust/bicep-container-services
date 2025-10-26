@@ -51,14 +51,32 @@ BeforeDiscovery {
     $script:Design = Get-Content -Path $DesignPath -Raw | ConvertFrom-Json
   }
 
-  # Get unique Resource Types
-  $script:ResourceTypes = $Design.resourceType | Sort-Object -Unique
+  # Resource Types to exclude from testing based on environment variables
+  $ResourceTypeExclusion = @(
+    # Example of excluding based on environment variable
+    # if ($ENV:EXCLUDETYPERESOURCETYPE) {
+    #   'ResourceType'
+    # }
+  )
+
+  # Get unique Resource Types, excluding those in the exclusion list
+  $script:ResourceTypes = $Design.resourceType | 
+  Where-Object { $_ -notin $ResourceTypeExclusion } | 
+  Sort-Object -Unique
 
   # Resource Types that do not have tags
-  $script:ResourceTypeTagExclusion = @()
+  $script:ResourceTypeTagExclusion = @(
+    # Example of how to exclude a resource type that does not have tags
+    # 'ResourceType'
+  )
 
   # Optional skip matrix for resource properties
-  $script:PropertySkipMatrix = @{}
+  $script:PropertySkipMatrix = @{
+    # Example of how to skip specific properties for a resource type, controlled via environment variables
+    # 'ResourceType' = @{
+    #   propertyName = $ENV:EXCLUDEPROPERTYPROPERTYNAME
+    # }
+  }
 }
 
 
@@ -241,7 +259,19 @@ Describe "Resource Type '<_>'" -ForEach $ResourceTypes {
         $Property = $_
         
         # Mapping of flattened design properties to their nested properties in the report
-        $PropertyMapping = @{}
+        $PropertyMapping = @{
+          # Example of property mapping for specific resource types to nested properties
+          # 'ResourceType'         = @{
+          #   propertyName        = { param($Resource) $Resource.properties.nestedObject.propertyName }
+          # }
+          # Example of using a Cmdlet to retrieve properties not returned in AzResource
+          # 'ResourceType' = @{
+          #   propertyName         = { param($Resource)
+          #     $resourceObject = Get-AzCmdlet -ResourceId $Resource.Id
+          #     $resourceObject.nestedObject.propertyName # AzResource did not return property
+          #   }
+          # }
+        }
 
         # Act
         # Skip when the property is disabled for this resource type

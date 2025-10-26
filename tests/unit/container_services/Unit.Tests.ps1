@@ -57,9 +57,10 @@ BeforeDiscovery {
 
   # Resource Types to exclude from testing based on environment variables
   $ResourceTypeExclusion = @(
-    if ($ENV:EXCLUDETYPEVIRTUALNETWORKPEERINGS) {
-      'Microsoft.Network/virtualNetworks/virtualNetworkPeerings'
-    }
+    # Example of excluding based on environment variable
+    # if ($ENV:EXCLUDETYPERESOURCETYPE) {
+    #   'ResourceType'
+    # }
   )
 
   # Get unique Resource Types, excluding those in the exclusion list
@@ -69,15 +70,16 @@ BeforeDiscovery {
 
   # Resource Types that do not have tags
   $script:ResourceTypeTagExclusion = @(
-    'Microsoft.Network/virtualNetworks/virtualNetworkPeerings'
-    'Microsoft.Network/virtualNetworks/subnets'
+    # Example of how to exclude a resource type that does not have tags
+    # 'ResourceType'
   )
 
   # Optional skip matrix for resource properties
   $script:PropertySkipMatrix = @{
-    'Microsoft.Network/virtualNetworks' = @{
-      virtualNetworkPeerings = $ENV:EXCLUDEPROPERTYVIRTUALNETWORKPEERINGS
-    }
+    # Example of how to skip specific properties for a resource type, controlled via environment variables
+    # 'ResourceType' = @{
+    #   propertyName = $ENV:EXCLUDEPROPERTYPROPERTYNAME
+    # }
   }
 }
 
@@ -248,24 +250,17 @@ Describe "Resource Type '<_>'" -ForEach $ResourceTypes {
         
         # Mapping of flattened design properties to their nested properties in the report
         $PropertyMapping = @{
-          'Microsoft.Network/virtualNetworks'         = @{
-            addressPrefixes        = { param($Resource) $Resource.properties.addressSpace.addressPrefixes }
-            dnsServers             = { param($Resource) $Resource.properties.dhcpOptions.dnsServers }
-            subnetNames            = { param($Resource) $Resource.properties.subnets.name }
-            virtualNetworkPeerings = { param($Resource) $Resource.properties.virtualNetworkPeerings.name }
-          }
-          'Microsoft.Network/networkSecurityGroups'   = @{
-            securityRuleNames = { param($Resource) $Resource.properties.securityRules.name }
-          }
-          'Microsoft.Network/routeTables'             = @{
-            routeNames = { param($Resource) $Resource.properties.routes.name }
-          }
-          'Microsoft.Network/virtualNetworks/subnets' = @{
-            addressPrefix          = { param($Resource) $Resource.properties.addressPrefix }
-            delegationName         = { param($Resource) $Resource.properties.delegations.name }
-            networkSecurityGroupId = { param($Resource) $Resource.properties.networkSecurityGroup.id }
-            routeTableId           = { param($Resource) $Resource.properties.routeTable.id }
-          }
+          # Example of property mapping for specific resource types to nested properties
+          # 'ResourceType'         = @{
+          #   propertyName        = { param($Resource) $Resource.properties.nestedObject.propertyName }
+          # }
+          # Example of using a Cmdlet to retrieve properties not returned in AzResource
+          # 'ResourceType' = @{
+          #   propertyName         = { param($Resource)
+          #     $resourceObject = Get-AzCmdlet -ResourceId $Resource.Id
+          #     $resourceObject.nestedObject.propertyName # AzResource did not return property
+          #   }
+          # }
         }
 
         # Act
